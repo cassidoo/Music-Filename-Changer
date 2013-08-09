@@ -12,20 +12,22 @@ if (!-d $startdir)
 	die "$startdir is not a directory";
 }
 
-# I love pickles
+# Call functions for both MP3s and MP4s
 
 MP3s();
 MP4s();
 
-sub stripUnwantedCrap
+#Stripping unwanted characters
+sub stripUnwanted
 {
-my $boog=shift;
-    $boog =~ tr{\\\/}{-};
-    $boog =~ tr{*?}{X};
-    $boog =~ tr{“><[]|:;,’=\"}{_};
-return $boog; 
+my $b=shift;
+    $b =~ tr{\\\/}{-};
+    $b =~ tr{*?}{X};
+    $b =~ tr{“><[]|:;,’=\"}{_};
+return $b; 
 }
 
+#Handles MP3 files.  Opens the directory, gets all the files, renames each one to title - artist - album
 sub MP3s {
 opendir(DIR, $startdir);
 my @files = grep(/\.mp3$/,readdir(DIR));
@@ -47,6 +49,8 @@ foreach $file (@files)
 closedir(DIR);
 }
 
+#Handles MP4 files.  Opens the directory, gets all the files, renames each one to title - artist - album.
+#Unwanted parts of the names have to be stripped here.
 sub MP4s {
 opendir(DIR, $startdir);
 my @files = grep(/\.m4a$/,readdir(DIR));
@@ -61,9 +65,9 @@ foreach $file (@files)
 {
 	my $tag = get_mp4tag($file) or next;
 	
-	my $name = stripUnwantedCrap($tag->{NAM});
-	my $art = stripUnwantedCrap($tag->{ART});
-	my $alb = stripUnwantedCrap($tag->{ALB});
+	my $name = stripUnwanted($tag->{NAM});
+	my $art = stripUnwanted($tag->{ART});
+	my $alb = stripUnwanted($tag->{ALB});
 	
 	my $title = $startdir . $name . " - " . $art . " - " . $alb;
 	rename $file, "$title.m4a";
